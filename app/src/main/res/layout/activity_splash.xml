@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_width="180dp"
+        android:layout_height="180dp"
+        android:src="@drawable/mindtick_logo"/>
+
+    <TextView
+        android:text="MindTick"
+        android:textColor="@color/primary"
+        android:textStyle="bold"
+        android:textSize="40sp"
+        android:layout_marginTop="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:text="스마트폰 센서와 AI를 활용하여\n당신의 집중 상태를 분석하고\n맞춤형 피드백을 제공합니다."
+        android:gravity="center"
+        android:textSize="16sp"
+        android:layout_marginTop="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnStart"
+        android:text="시작하기"
+        android:backgroundTint="@color/primary"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="40dp"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"/>
+
+</LinearLayout>
