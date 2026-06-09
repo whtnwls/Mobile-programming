@@ -8,6 +8,8 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import java.util.Calendar
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class HomeActivity : AppCompatActivity() {
 
@@ -121,6 +123,34 @@ class HomeActivity : AppCompatActivity() {
 
             currentScore =
                 score
+
+            val date =
+
+                SimpleDateFormat(
+                    "yyyy-MM-dd HH:mm",
+                    Locale.getDefault()
+                ).format(
+                    System.currentTimeMillis()
+                )
+
+            RecordStorage.records.add(
+
+                0,
+
+                RecordItem(
+
+                    date,
+
+                    score,
+
+                    noise,
+
+                    movement,
+
+                    time
+
+                )
+            )
 
             when {
 
