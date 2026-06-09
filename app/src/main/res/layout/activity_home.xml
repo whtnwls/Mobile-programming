@@ -27,11 +27,14 @@
 
         <ImageButton
             android:id="@+id/btnNotification"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
             android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
             android:src="@drawable/bell"/>
+
     </RelativeLayout>
 
     <!-- 현재 집중 점수 -->
@@ -58,7 +61,7 @@
             android:layout_width="260dp"
             android:layout_height="260dp"
             android:max="100"
-            android:progress="82"
+            android:progress="0"
             android:rotation="270"/>
 
         <LinearLayout
@@ -69,23 +72,22 @@
 
             <TextView
                 android:id="@+id/tvScore"
-                android:text="82"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--"
                 android:textSize="60sp"
                 android:textStyle="bold"
-                android:textColor="@color/text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:textColor="@color/text"/>
 
             <TextView
-                android:text="/ 100"
-                android:textSize="20sp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:text="/ 100"
+                android:textSize="20sp"/>
 
         </LinearLayout>
 
     </FrameLayout>
-
     <!-- 상태 -->
 
     <TextView
@@ -95,7 +97,7 @@
         android:layout_gravity="center"
         android:gravity="center"
         android:background="@color/primary_light"
-        android:text="집중하기 좋은 상태에요!"
+        android:text="분석중..."
         android:textColor="@color/primary"
         android:textStyle="bold"/>
 
@@ -121,6 +123,8 @@
             android:orientation="vertical"
             android:padding="12dp">
 
+            <!-- 소음 -->
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -144,7 +148,7 @@
                     android:id="@+id/tvNoise"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="낮음"
+                    android:text="분석중..."
                     android:textColor="@color/primary"
                     android:textStyle="bold"/>
 
@@ -154,6 +158,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="#DDDDDD"/>
+
+            <!-- 움직임 -->
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -179,7 +185,7 @@
                     android:id="@+id/tvMovement"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="없음"
+                    android:text="분석중..."
                     android:textColor="@color/primary"
                     android:textStyle="bold"/>
 
@@ -189,6 +195,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="#DDDDDD"/>
+            <!-- 시간대 -->
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -214,7 +221,7 @@
                     android:id="@+id/tvTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="적합"
+                    android:text="분석중..."
                     android:textColor="@color/primary"
                     android:textStyle="bold"/>
 
@@ -237,6 +244,7 @@
         android:background="@drawable/btn_filled_green"/>
 
     <!-- 하단 구분선 -->
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
@@ -244,6 +252,7 @@
         android:layout_marginTop="12dp"/>
 
     <!-- 하단 네비게이션 -->
+
     <LinearLayout
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
@@ -251,8 +260,8 @@
         android:orientation="horizontal"
         android:background="#FFFFFF"
         android:gravity="center">
-
         <!-- 홈 -->
+
         <LinearLayout
             android:id="@+id/navHome"
             android:layout_width="0dp"
@@ -264,7 +273,7 @@
             <ImageView
                 android:layout_width="40dp"
                 android:layout_height="24dp"
-                android:src="@drawable/home"/>
+                android:src="@drawable/homegreen"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -273,9 +282,11 @@
                 android:textSize="12sp"
                 android:textColor="@color/primary"
                 android:textStyle="bold"/>
+
         </LinearLayout>
 
         <!-- 피드백 -->
+
         <LinearLayout
             android:id="@+id/navFeedback"
             android:layout_width="0dp"
@@ -287,7 +298,7 @@
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/lightbulb"/>
+                android:src="@drawable/feedback"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -295,9 +306,11 @@
                 android:text="피드백"
                 android:textSize="12sp"
                 android:textColor="#222222"/>
+
         </LinearLayout>
 
         <!-- 기록 -->
+
         <LinearLayout
             android:id="@+id/navRecord"
             android:layout_width="0dp"
@@ -309,7 +322,7 @@
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/chart"/>
+                android:src="@drawable/re"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -317,6 +330,7 @@
                 android:text="기록"
                 android:textSize="12sp"
                 android:textColor="#222222"/>
+
         </LinearLayout>
 
     </LinearLayout>

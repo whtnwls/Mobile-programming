@@ -84,15 +84,19 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:text="주변 소음이 높아요"
+                    android:id="@+id/tvNoiseTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="소음 분석"
                     android:textStyle="bold"
                     android:textSize="18sp"/>
-
                 <TextView
+                    android:id="@+id/tvNoiseDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="현재 주변 소음이 다소 높습니다.\n이어폰 사용을 추천합니다."
+                    android:text="분석중..."
                     android:textColor="#666666"/>
-
             </LinearLayout>
 
         </LinearLayout>
@@ -126,13 +130,19 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:text="이동 중으로 감지돼요"
+                    android:id="@+id/tvMovementTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="움직임 분석"
                     android:textStyle="bold"
                     android:textSize="18sp"/>
 
                 <TextView
+                    android:id="@+id/tvMovementDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="이동 중에는 암기 위주 학습이\n효율적입니다."
+                    android:text="분석중..."
                     android:textColor="#666666"/>
 
             </LinearLayout>
@@ -168,13 +178,19 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:text="늦은 시간대예요"
+                    android:id="@+id/tvTimeTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="시간 분석"
                     android:textStyle="bold"
                     android:textSize="18sp"/>
 
                 <TextView
+                    android:id="@+id/tvTimeDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="현재는 늦은 시간대입니다.\n짧은 휴식을 권장합니다."
+                    android:text="분석중..."
                     android:textColor="#666666"/>
 
             </LinearLayout>
@@ -244,7 +260,7 @@
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/lightbulb"/>
+                android:src="@drawable/feedbackgreen"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -267,7 +283,7 @@
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/chart"/>
+                android:src="@drawable/re"/>
 
             <TextView
                 android:layout_width="wrap_content"
