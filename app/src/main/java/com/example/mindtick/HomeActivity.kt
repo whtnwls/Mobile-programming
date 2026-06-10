@@ -11,6 +11,8 @@ import java.util.Calendar
 import java.text.SimpleDateFormat
 import java.util.Locale
 import com.google.android.material.progressindicator.CircularProgressIndicator
+import android.media.MediaRecorder
+import kotlin.math.log10
 
 class HomeActivity : AppCompatActivity() {
 
@@ -18,6 +20,70 @@ class HomeActivity : AppCompatActivity() {
     private var currentMovement = ""
     private var currentTime = ""
     private var currentScore = 0
+
+    private var recorder: MediaRecorder? = null
+
+    private fun getNoiseLevel(): String {
+
+        return try {
+
+            recorder =
+                MediaRecorder()
+
+            recorder?.apply {
+
+                setAudioSource(
+                    MediaRecorder.AudioSource.MIC
+                )
+
+                setOutputFormat(
+                    MediaRecorder.OutputFormat.THREE_GPP
+                )
+
+                setAudioEncoder(
+                    MediaRecorder.AudioEncoder.AMR_NB
+                )
+
+                setOutputFile(
+                    "${cacheDir.absolutePath}/temp.3gp"
+                )
+
+                prepare()
+                start()
+            }
+
+            Thread.sleep(1000)
+
+            val amplitude =
+                recorder?.maxAmplitude ?: 0
+
+            recorder?.stop()
+            recorder?.release()
+
+            recorder = null
+
+            val db =
+                if (amplitude > 0)
+                    20 * log10(
+                        amplitude.toDouble()
+                    )
+                else
+                    0.0
+
+            when {
+
+                db < 70 -> "낮음"
+
+                db < 85 -> "보통"
+
+                else -> "높음"
+            }
+
+        } catch (e: Exception) {
+
+            "보통"
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,17 +123,14 @@ class HomeActivity : AppCompatActivity() {
 
         btnAnalyzeAgain.setOnClickListener {
 
-            val noiseList =
-                listOf("낮음", "보통", "높음")
-
-            val movementList =
-                listOf("없음", "있음")
-
             val noise =
-                noiseList.random()
+                getNoiseLevel()
 
             val movement =
-                movementList.random()
+                listOf(
+                    "없음",
+                    "있음"
+                ).random()
 
             val hour =
                 Calendar.getInstance()
