@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import java.util.Calendar
 import java.text.SimpleDateFormat
 import java.util.Locale
+import com.google.android.material.progressindicator.CircularProgressIndicator
 
 class HomeActivity : AppCompatActivity() {
 
@@ -20,6 +21,9 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        RecordStorage.load(this)
+
         setContentView(R.layout.activity_home)
 
         val tvScore =
@@ -38,7 +42,9 @@ class HomeActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.tvFocusState)
 
         val progressScore =
-            findViewById<ProgressBar>(R.id.progressScore)
+            findViewById<CircularProgressIndicator>(
+                R.id.progressScore
+            )
 
         val btnAnalyzeAgain =
             findViewById<Button>(R.id.btnAnalyzeAgain)
@@ -151,6 +157,7 @@ class HomeActivity : AppCompatActivity() {
 
                 )
             )
+            RecordStorage.save(this)
 
             when {
 

@@ -65,14 +65,19 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="12dp">
 
-                <ProgressBar
+                <com.google.android.material.progressindicator.CircularProgressIndicator
                     android:id="@+id/progressScore"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="260dp"
-                    android:layout_height="260dp"
+                    android:layout_width="220dp"
+                    android:layout_height="220dp"
+                    android:layout_gravity="center"
+                    android:indeterminate="false"
+                    app:indicatorColor="#20B486"
+                    app:trackColor="#DFF5EC"
                     android:max="100"
                     android:progress="0"
-                    android:rotation="270"/>
+                    app:indicatorSize="220dp"
+                    app:indicatorInset="0dp"
+                    app:trackThickness="12dp"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
