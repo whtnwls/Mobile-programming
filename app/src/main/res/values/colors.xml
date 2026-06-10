@@ -5,4 +5,6 @@
     <color name="gray">#F5F5F5</color>
     <color name="text">#222222</color>
     <color name="background">#FAF9FB</color>
+    <color name="primary_dark">#20B486</color>
+    <color name="secondary">#20B486</color>
 </resources>

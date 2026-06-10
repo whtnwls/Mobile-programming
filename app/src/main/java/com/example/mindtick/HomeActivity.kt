@@ -8,6 +8,11 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import java.util.Calendar
+import java.text.SimpleDateFormat
+import java.util.Locale
+import com.google.android.material.progressindicator.CircularProgressIndicator
+import android.media.MediaRecorder
+import kotlin.math.log10
 
 class HomeActivity : AppCompatActivity() {
 
@@ -16,8 +21,75 @@ class HomeActivity : AppCompatActivity() {
     private var currentTime = ""
     private var currentScore = 0
 
+    private var recorder: MediaRecorder? = null
+
+    private fun getNoiseLevel(): String {
+
+        return try {
+
+            recorder =
+                MediaRecorder()
+
+            recorder?.apply {
+
+                setAudioSource(
+                    MediaRecorder.AudioSource.MIC
+                )
+
+                setOutputFormat(
+                    MediaRecorder.OutputFormat.THREE_GPP
+                )
+
+                setAudioEncoder(
+                    MediaRecorder.AudioEncoder.AMR_NB
+                )
+
+                setOutputFile(
+                    "${cacheDir.absolutePath}/temp.3gp"
+                )
+
+                prepare()
+                start()
+            }
+
+            Thread.sleep(1000)
+
+            val amplitude =
+                recorder?.maxAmplitude ?: 0
+
+            recorder?.stop()
+            recorder?.release()
+
+            recorder = null
+
+            val db =
+                if (amplitude > 0)
+                    20 * log10(
+                        amplitude.toDouble()
+                    )
+                else
+                    0.0
+
+            when {
+
+                db < 70 -> "낮음"
+
+                db < 85 -> "보통"
+
+                else -> "높음"
+            }
+
+        } catch (e: Exception) {
+
+            "보통"
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        RecordStorage.load(this)
+
         setContentView(R.layout.activity_home)
 
         val tvScore =
@@ -36,7 +108,9 @@ class HomeActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.tvFocusState)
 
         val progressScore =
-            findViewById<ProgressBar>(R.id.progressScore)
+            findViewById<CircularProgressIndicator>(
+                R.id.progressScore
+            )
 
         val btnAnalyzeAgain =
             findViewById<Button>(R.id.btnAnalyzeAgain)
@@ -49,17 +123,14 @@ class HomeActivity : AppCompatActivity() {
 
         btnAnalyzeAgain.setOnClickListener {
 
-            val noiseList =
-                listOf("낮음", "보통", "높음")
-
-            val movementList =
-                listOf("없음", "있음")
-
             val noise =
-                noiseList.random()
+                getNoiseLevel()
 
             val movement =
-                movementList.random()
+                listOf(
+                    "없음",
+                    "있음"
+                ).random()
 
             val hour =
                 Calendar.getInstance()
@@ -121,6 +192,35 @@ class HomeActivity : AppCompatActivity() {
 
             currentScore =
                 score
+
+            val date =
+
+                SimpleDateFormat(
+                    "yyyy-MM-dd HH:mm",
+                    Locale.getDefault()
+                ).format(
+                    System.currentTimeMillis()
+                )
+
+            RecordStorage.records.add(
+
+                0,
+
+                RecordItem(
+
+                    date,
+
+                    score,
+
+                    noise,
+
+                    movement,
+
+                    time
+
+                )
+            )
+            RecordStorage.save(this)
 
             when {
 
