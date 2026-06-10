@@ -7,8 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object GroqManager {
 
-    private const val API_KEY =
-        "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"
+    private const val API_KEY = ""
     private val retrofit =
 
         Retrofit.Builder()
