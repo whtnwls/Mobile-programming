@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import android.app.DatePickerDialog
 
 class RecordActivity : AppCompatActivity() {
 
@@ -73,6 +74,11 @@ class RecordActivity : AppCompatActivity() {
         val btnNext =
             findViewById<ImageButton>(
                 R.id.btnNext
+            )
+
+        val btnCalendar =
+            findViewById<ImageButton>(
+                R.id.btnCalendar
             )
 
         val btnDay =
@@ -491,6 +497,40 @@ class RecordActivity : AppCompatActivity() {
             updateDateText()
 
             refreshUI()
+        }
+
+        btnCalendar.setOnClickListener {
+
+            val cal =
+                Calendar.getInstance()
+
+            cal.time =
+                currentDate
+
+            DatePickerDialog(
+                this,
+                { _, year, month, day ->
+
+                    val selectedCal =
+                        Calendar.getInstance()
+
+                    selectedCal.set(
+                        year,
+                        month,
+                        day
+                    )
+
+                    currentDate =
+                        selectedCal.time
+
+                    updateDateText()
+
+                    refreshUI()
+                },
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH),
+                cal.get(Calendar.DAY_OF_MONTH)
+            ).show()
         }
 
         btnDay.performClick()

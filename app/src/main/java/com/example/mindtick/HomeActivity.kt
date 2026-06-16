@@ -1,111 +1,164 @@
 package com.example.mindtick
 
 import android.content.Intent
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.media.AudioFormat
+import android.media.AudioRecord
+import android.media.MediaRecorder
 import android.os.Bundle
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import java.util.Calendar
-import java.text.SimpleDateFormat
-import java.util.Locale
 import com.google.android.material.progressindicator.CircularProgressIndicator
-import android.media.MediaRecorder
-import kotlin.math.log10
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import kotlin.math.sqrt
 
-class HomeActivity : AppCompatActivity() {
+class HomeActivity :
+    AppCompatActivity(),
+    SensorEventListener {
 
     private var currentNoise = ""
     private var currentMovement = ""
     private var currentTime = ""
     private var currentScore = 0
 
-    private var recorder: MediaRecorder? = null
+    private var sensorManager: SensorManager? = null
+
+    private var movementDetected = false
+
+    private var lastX = 0f
+    private var lastY = 0f
+    private var lastZ = 0f
 
     private fun getNoiseLevel(): String {
 
+        if (
+            checkSelfPermission(
+                android.Manifest.permission.RECORD_AUDIO
+            ) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+
+            return "권한없음"
+        }
+
         return try {
 
-            recorder =
-                MediaRecorder()
+            val sampleRate = 44100
 
-            recorder?.apply {
-
-                setAudioSource(
-                    MediaRecorder.AudioSource.MIC
+            val bufferSize =
+                AudioRecord.getMinBufferSize(
+                    sampleRate,
+                    AudioFormat.CHANNEL_IN_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT
                 )
 
-                setOutputFormat(
-                    MediaRecorder.OutputFormat.THREE_GPP
+            val audioRecord =
+                AudioRecord(
+                    MediaRecorder.AudioSource.MIC,
+                    sampleRate,
+                    AudioFormat.CHANNEL_IN_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT,
+                    bufferSize
                 )
 
-                setAudioEncoder(
-                    MediaRecorder.AudioEncoder.AMR_NB
-                )
+            val buffer =
+                ShortArray(bufferSize)
 
-                setOutputFile(
-                    "${cacheDir.absolutePath}/temp.3gp"
-                )
-
-                prepare()
-                start()
-            }
+            audioRecord.startRecording()
 
             Thread.sleep(1000)
 
-            val amplitude =
-                recorder?.maxAmplitude ?: 0
+            audioRecord.read(
+                buffer,
+                0,
+                buffer.size
+            )
 
-            recorder?.stop()
-            recorder?.release()
+            audioRecord.stop()
+            audioRecord.release()
 
-            recorder = null
+            var sum = 0.0
 
-            val db =
-                if (amplitude > 0)
-                    20 * log10(
-                        amplitude.toDouble()
-                    )
-                else
-                    0.0
+            for (sample in buffer) {
+                sum += sample * sample
+            }
+
+            val rms =
+                sqrt(sum / buffer.size)
 
             when {
-
-                db < 70 -> "낮음"
-
-                db < 85 -> "보통"
-
+                rms < 300 -> "낮음"
+                rms < 1500 -> "보통"
                 else -> "높음"
             }
 
         } catch (e: Exception) {
 
+            e.printStackTrace()
             "보통"
         }
     }
+    override fun onCreate(
+        savedInstanceState: Bundle?
+    ) {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        super.onCreate(
+            savedInstanceState
+        )
 
         RecordStorage.load(this)
 
-        setContentView(R.layout.activity_home)
+        setContentView(
+            R.layout.activity_home
+        )
+
+        sensorManager =
+            getSystemService(
+                SENSOR_SERVICE
+            ) as SensorManager
+
+        val accelerometer =
+            sensorManager?.getDefaultSensor(
+                Sensor.TYPE_ACCELEROMETER
+            )
+
+        sensorManager?.registerListener(
+            this,
+            accelerometer,
+            SensorManager.SENSOR_DELAY_NORMAL
+        )
 
         val tvScore =
-            findViewById<TextView>(R.id.tvScore)
+            findViewById<TextView>(
+                R.id.tvScore
+            )
 
         val tvNoise =
-            findViewById<TextView>(R.id.tvNoise)
+            findViewById<TextView>(
+                R.id.tvNoise
+            )
 
         val tvMovement =
-            findViewById<TextView>(R.id.tvMovement)
+            findViewById<TextView>(
+                R.id.tvMovement
+            )
 
         val tvTime =
-            findViewById<TextView>(R.id.tvTime)
+            findViewById<TextView>(
+                R.id.tvTime
+            )
 
         val tvFocusState =
-            findViewById<TextView>(R.id.tvFocusState)
+            findViewById<TextView>(
+                R.id.tvFocusState
+            )
 
         val progressScore =
             findViewById<CircularProgressIndicator>(
@@ -113,147 +166,177 @@ class HomeActivity : AppCompatActivity() {
             )
 
         val btnAnalyzeAgain =
-            findViewById<Button>(R.id.btnAnalyzeAgain)
+            findViewById<Button>(
+                R.id.btnAnalyzeAgain
+            )
 
         val navFeedback =
-            findViewById<LinearLayout>(R.id.navFeedback)
+            findViewById<LinearLayout>(
+                R.id.navFeedback
+            )
 
         val navRecord =
-            findViewById<LinearLayout>(R.id.navRecord)
+            findViewById<LinearLayout>(
+                R.id.navRecord
+            )
+
+        tvScore.text = "--"
+
+        tvNoise.text = "--"
+
+        tvMovement.text = "--"
+
+        tvTime.text = "--"
+
+        tvFocusState.text =
+            "분석 전입니다."
+
+        progressScore.progress = 0
 
         btnAnalyzeAgain.setOnClickListener {
 
-            val noise =
-                getNoiseLevel()
+            tvFocusState.text =
+                "분석 중입니다..."
 
-            val movement =
-                listOf(
-                    "없음",
-                    "있음"
-                ).random()
+            btnAnalyzeAgain.isEnabled = false
 
-            val hour =
-                Calendar.getInstance()
-                    .get(Calendar.HOUR_OF_DAY)
+            tvFocusState.postDelayed({
 
-            val time = when {
+                val noise =
+                    getNoiseLevel()
 
-                hour in 9..18 -> "적합"
+                val movement =
+                    if (movementDetected)
+                        "있음"
+                    else
+                        "없음"
 
-                hour in 19..22 -> "보통"
+                val hour =
+                    Calendar.getInstance()
+                        .get(Calendar.HOUR_OF_DAY)
 
-                else -> "부적합"
-            }
+                val time = when {
 
-            tvNoise.text = noise
-            tvMovement.text = movement
-            tvTime.text = time
+                    hour in 9..18 -> "적합"
 
-            var score = 100
+                    hour in 19..22 -> "보통"
 
-            when (noise) {
+                    else -> "부적합"
+                }
 
-                "보통" -> score -= 15
+                tvNoise.text =
+                    noise
 
-                "높음" -> score -= 30
-            }
+                tvMovement.text =
+                    movement
 
-            if (movement == "있음") {
-
-                score -= 20
-            }
-
-            when (time) {
-
-                "보통" -> score -= 10
-
-                "부적합" -> score -= 25
-            }
-
-            if (score < 0) {
-
-                score = 0
-            }
-
-            tvScore.text =
-                score.toString()
-
-            progressScore.progress =
-                score
-
-            currentNoise =
-                noise
-
-            currentMovement =
-                movement
-
-            currentTime =
-                time
-
-            currentScore =
-                score
-
-            val date =
-
-                SimpleDateFormat(
-                    "yyyy-MM-dd HH:mm",
-                    Locale.getDefault()
-                ).format(
-                    System.currentTimeMillis()
-                )
-
-            RecordStorage.records.add(
-
-                0,
-
-                RecordItem(
-
-                    date,
-
-                    score,
-
-                    noise,
-
-                    movement,
-
+                tvTime.text =
                     time
 
+                var score = 100
+
+                when (noise) {
+
+                    "보통" -> score -= 15
+
+                    "높음" -> score -= 30
+                }
+
+                if (movement == "있음") {
+
+                    score -= 20
+                }
+
+                when (time) {
+
+                    "보통" -> score -= 10
+
+                    "부적합" -> score -= 25
+                }
+
+                if (score < 0) {
+
+                    score = 0
+                }
+
+                tvScore.text =
+                    score.toString()
+
+                progressScore.progress =
+                    score
+
+                currentNoise =
+                    noise
+
+                currentMovement =
+                    movement
+
+                currentTime =
+                    time
+
+                currentScore =
+                    score
+
+                val date =
+                    SimpleDateFormat(
+                        "yyyy-MM-dd HH:mm",
+                        Locale.getDefault()
+                    ).format(
+                        System.currentTimeMillis()
+                    )
+
+                RecordStorage.records.add(
+                    0,
+                    RecordItem(
+                        date,
+                        score,
+                        noise,
+                        movement,
+                        time
+                    )
                 )
-            )
-            RecordStorage.save(this)
 
-            when {
+                RecordStorage.save(this)
 
-                score >= 90 -> {
+                btnAnalyzeAgain.isEnabled =
+                    true
 
-                    tvFocusState.text =
-                        "최고의 집중 상태에요!"
+                movementDetected = false
+
+                when {
+
+                    score >= 90 -> {
+
+                        tvFocusState.text =
+                            "최고의 집중 상태에요!"
+                    }
+
+                    score >= 80 -> {
+
+                        tvFocusState.text =
+                            "집중하기 좋은 상태에요!"
+                    }
+
+                    score >= 70 -> {
+
+                        tvFocusState.text =
+                            "집중력이 양호해요."
+                    }
+
+                    score >= 60 -> {
+
+                        tvFocusState.text =
+                            "집중력이 조금 떨어지고 있어요."
+                    }
+
+                    else -> {
+
+                        tvFocusState.text =
+                            "환경 개선이 필요해요!"
+                    }
                 }
 
-                score >= 80 -> {
-
-                    tvFocusState.text =
-                        "집중하기 좋은 상태에요!"
-                }
-
-                score >= 70 -> {
-
-                    tvFocusState.text =
-                        "집중력이 양호해요."
-                }
-
-                score >= 60 -> {
-
-                    tvFocusState.text =
-                        "집중력이 조금 떨어지고 있어요."
-                }
-
-                else -> {
-
-                    tvFocusState.text =
-                        "환경 개선이 필요해요!"
-                }
-            }
+            }, 2000)
         }
 
         navFeedback.setOnClickListener {
@@ -286,6 +369,7 @@ class HomeActivity : AppCompatActivity() {
 
             startActivity(intent)
         }
+
         navRecord.setOnClickListener {
 
             startActivity(
@@ -294,11 +378,57 @@ class HomeActivity : AppCompatActivity() {
                     RecordActivity::class.java
                 )
             )
-
         }
 
-        // 앱 시작 시 자동 분석
-        btnAnalyzeAgain.performClick()
+        val skipAnalysis =
+            intent.getBooleanExtra(
+                "skipAnalysis",
+                false
+            )
 
+        if (!skipAnalysis) {
+
+            btnAnalyzeAgain.performClick()
+        }
+    }
+
+    override fun onSensorChanged(
+        event: SensorEvent?
+    ) {
+
+        event ?: return
+
+        val x = event.values[0]
+        val y = event.values[1]
+        val z = event.values[2]
+
+        val delta =
+            kotlin.math.abs(x - lastX) +
+                    kotlin.math.abs(y - lastY) +
+                    kotlin.math.abs(z - lastZ)
+
+        if (delta > 5) {
+
+            movementDetected = true
+        }
+
+        lastX = x
+        lastY = y
+        lastZ = z
+    }
+
+    override fun onAccuracyChanged(
+        sensor: Sensor?,
+        accuracy: Int
+    ) {
+    }
+
+    override fun onDestroy() {
+
+        super.onDestroy()
+
+        sensorManager?.unregisterListener(
+            this
+        )
     }
 }
